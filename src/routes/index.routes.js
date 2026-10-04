@@ -25,10 +25,5 @@ router.get("/health", (req, res) => {
 // Auth routes
 router.use("/auth", authRoutes);
 
-// User routes
-// router.use("/users", userRoutes);
-
-// Admin routes
-// router.use("/admin", adminRoutes);
 
 export default router;

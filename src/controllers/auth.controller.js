@@ -180,9 +180,7 @@ export const googleLogin = asyncHandler(async (req, res) => {
         });
     }
 
-    const decodedToken = await firebaseAdminAuth.verifyIdToken(
-        googleToken
-    );
+    const decodedToken = await firebaseAdminAuth.verifyIdToken(googleToken);
 
     const {
         uid,

@@ -9,4 +9,9 @@ router
     .get(protect, getProfile)
     .put(protect, updateProfile);
 
+
+    router.route('/users/:id')
+    .get()
+    .patch()
+
 export default router;
