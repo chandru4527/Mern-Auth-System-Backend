@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import User from "../models/user.model.js";
+import User from "../models/users.model.js";
 import asyncHandler from "../utils/asyncHandler.js";
 
 export const protect = asyncHandler(async (req, res, next) => {
@@ -15,7 +15,7 @@ export const protect = asyncHandler(async (req, res, next) => {
     let decoded;
 
     try {
-        decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
+        decoded = jwt.verify(token, process.env.JWT_ACCESS_TOKEN_SECRET);
     } catch {
         return res.status(401).json({
             success: false,

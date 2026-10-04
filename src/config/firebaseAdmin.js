@@ -1,16 +1,14 @@
-import admin from "firebase-admin";
-import { readFileSync } from "node:fs";
+import { initializeApp, cert } from "firebase-admin/app";
+import { getAuth } from "firebase-admin/auth";
 
-const serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
+const firebaseAdmin = initializeApp({
+  credential: cert({
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+    privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+  }),
+});
 
-const serviceAccount = JSON.parse(
-  readFileSync(serviceAccountPath, "utf8")
-);
+export const firebaseAdminAuth = getAuth(firebaseAdmin);
 
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-  });
-}
-
-export const firebaseAdminAuth = admin.auth();
+export default firebaseAdmin;

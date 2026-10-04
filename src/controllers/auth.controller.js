@@ -1,20 +1,19 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { randomBytes } from "node:crypto";
 
 import Users from "../models/users.model.js";
 import asyncHandler from "../utils/asyncHandler.js";
 
 import { firebaseAdminAuth } from "../config/firebaseAdmin.js";
 
-import {  generateAccessToken,  generateRefreshToken,} from "../utils/generateTokens.js";
+import { generateAccessToken, generateRefreshToken, } from "../utils/generateTokens.js";
 
 
 const JWT_REFRESH_TOKEN_SECRET = process.env.JWT_REFRESH_TOKEN_SECRET;
 
 const isProduction = process.env.NODE_ENV === "production";
 
-const ACCESS_TOKEN_MAX_AGE = 15 * 60 * 1000;
+const ACCESS_TOKEN_MAX_AGE = 2 * 60 * 1000;
 const REFRESH_TOKEN_MAX_AGE = 7 * 24 * 60 * 60 * 1000;
 
 // Cookie options
@@ -46,26 +45,34 @@ const sendUserResponse = (user) => ({
     mobile: user.mobile,
     address: user.address,
     dateOfBirth: user.dateOfBirth,
+    termsAccepted: user.termsAccepted,
+    termsAcceptedAt: user.termsAcceptedAt,
+    createdAt: user.createdAt,
 });
 
 // POST /api/auth/register
 export const register = asyncHandler(async (req, res) => {
-    const { name, userName, email, password } = req.body;
+    const { name, email, password, termsAccepted } = req.body;
 
-    if (!name?.trim() || !userName?.trim() || !email?.trim() || !password) {
+    // Validate required fields
+    if (!name?.trim() || !email?.trim() || !password || !termsAccepted) {
         return res.status(400).json({
             success: false,
-            message: "Name, username, email and password are required",
+            message: "Name, email, password and terms acceptance are required",
         });
     }
 
-    if (name.trim().length < 2 || name.trim().length > 50) {
+    // Validate name
+    const trimmedName = name.trim();
+
+    if (trimmedName.length < 2 || trimmedName.length > 50) {
         return res.status(400).json({
             success: false,
             message: "Name must be between 2 and 50 characters",
         });
     }
 
+    // Validate password
     if (password.length < 8) {
         return res.status(400).json({
             success: false,
@@ -73,41 +80,42 @@ export const register = asyncHandler(async (req, res) => {
         });
     }
 
+    // Normalize email
     const normalizedEmail = email.trim().toLowerCase();
-    const normalizedUserName = userName.trim();
 
+    // Check existing user
     const existingUser = await Users.findOne({
-        $or: [
-            { email: normalizedEmail },
-            { userName: normalizedUserName },
-        ],
+        email: normalizedEmail,
     });
 
     if (existingUser) {
         return res.status(409).json({
             success: false,
-            message: "Email or username is already registered",
+            message: "Email is already registered",
         });
     }
 
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 12);
 
+    // Create user
     const user = await Users.create({
-        name: name.trim(),
-        userName: normalizedUserName,
+        name: trimmedName,
         email: normalizedEmail,
         password: hashedPassword,
     });
 
+    // Generate tokens
     const accessToken = generateAccessToken(user._id);
     const refreshToken = generateRefreshToken(user._id);
 
+    // Set HTTP-only cookies
     res.cookie("accessToken", accessToken, accessCookieOptions);
     res.cookie("refreshToken", refreshToken, refreshCookieOptions);
 
     return res.status(201).json({
         success: true,
-        message: "Registration successful!",
+        message: "Registration successful!...",
         results: {
             user: sendUserResponse(user),
         },
@@ -125,8 +133,10 @@ export const login = asyncHandler(async (req, res) => {
         });
     }
 
+    const normalizedEmail = email.trim().toLowerCase();
+
     const user = await Users.findOne({
-        email: email.trim().toLowerCase(),
+        email: normalizedEmail,
     }).select("+password");
 
     if (!user || !(await bcrypt.compare(password, user.password))) {
@@ -139,7 +149,8 @@ export const login = asyncHandler(async (req, res) => {
     if (!user.isActive) {
         return res.status(403).json({
             success: false,
-            message: "Your account is inactive. Please contact the administrator.",
+            message:
+                "Your account is inactive. Please contact the administrator.",
         });
     }
 
@@ -158,23 +169,30 @@ export const login = asyncHandler(async (req, res) => {
     });
 });
 
-// POST /api/auth/google
+// POST /api/auth/google-login
 export const googleLogin = asyncHandler(async (req, res) => {
-    const { credential } = req.body;
+    const { googleToken, termsAccepted } = req.body;
 
-    if (!credential || typeof credential !== "string") {
+    if (!googleToken || typeof googleToken !== "string") {
         return res.status(400).json({
             success: false,
-            message: "Firebase ID token is required",
+            message: "Google ID token is required",
         });
     }
 
-    // Verify the Firebase ID token on the backend
-    const decodedToken = await firebaseAdminAuth.verifyIdToken(credential);
+    const decodedToken = await firebaseAdminAuth.verifyIdToken(
+        googleToken
+    );
 
-    const { uid, email, email_verified, name, picture } = decodedToken;
+    const {
+        uid,
+        email,
+        email_verified: emailVerified,
+        name,
+        picture,
+    } = decodedToken;
 
-    if (!email || !email_verified) {
+    if (!email || !emailVerified) {
         return res.status(401).json({
             success: false,
             message: "A verified Google email is required",
@@ -183,7 +201,6 @@ export const googleLogin = asyncHandler(async (req, res) => {
 
     const normalizedEmail = email.trim().toLowerCase();
 
-    // Find an account by Firebase UID or email
     const user = await Users.findOne({
         $or: [
             { googleId: uid },
@@ -194,19 +211,26 @@ export const googleLogin = asyncHandler(async (req, res) => {
     let authenticatedUser = user;
 
     if (user) {
-        // Do not silently link an existing password account
         if (user.googleId !== uid) {
             return res.status(409).json({
                 success: false,
-                message: "An account with this email already exists",
+                message:
+                    "An account with this email already exists. Please login using your password.",
             });
         }
     } else {
-        const baseUsername = (
-            normalizedEmail.split("@")[0] || "user"
-        )
-            .replace(/[^a-zA-Z0-9_]/g, "")
-            .slice(0, 20) || "user";
+        if (termsAccepted !== true) {
+            return res.status(400).json({
+                success: false,
+                message:
+                    "You must agree to the Terms & Conditions and Privacy Policy",
+            });
+        }
+
+        const baseUsername =
+            (normalizedEmail.split("@")[0] || "user")
+                .replace(/[^a-zA-Z0-9_]/g, "")
+                .slice(0, 20) || "user";
 
         let userName = baseUsername;
         let count = 1;
@@ -215,15 +239,14 @@ export const googleLogin = asyncHandler(async (req, res) => {
             userName = `${baseUsername}${count++}`;
         }
 
-        const randomPassword = randomBytes(32).toString("hex");
-        const hashedPassword = await bcrypt.hash(randomPassword, 12);
-
         authenticatedUser = await Users.create({
-            name: name || baseUsername,
+            name: name?.trim() || baseUsername,
             userName,
             email: normalizedEmail,
-            password: hashedPassword,
+            password: null,
             googleId: uid,
+            termsAccepted: true,
+            termsAcceptedAt: new Date(),
             ...(picture ? { profileImage: picture } : {}),
         });
     }
@@ -231,11 +254,11 @@ export const googleLogin = asyncHandler(async (req, res) => {
     if (!authenticatedUser.isActive) {
         return res.status(403).json({
             success: false,
-            message: "Your account is inactive. Please contact the administrator.",
+            message:
+                "Your account is inactive. Please contact the administrator.",
         });
     }
 
-    // Generate Authify JWT cookies
     const accessToken = generateAccessToken(authenticatedUser._id);
     const refreshToken = generateRefreshToken(authenticatedUser._id);
 

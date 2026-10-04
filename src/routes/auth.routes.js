@@ -2,7 +2,7 @@ import { Router } from "express";
 
 import { register, login, getMe, logout, refreshAccessToken, googleLogin } from "../controllers/auth.controller.js";
 
-import { protect } from "../middlewares/auth.middleware.js";
+import { protect } from "../middleware/athuMiddleware.js";
 
 const router = Router();
 
