@@ -28,8 +28,7 @@ export const getProfile = asyncHandler(async (req, res) => {
 
 // PUT /api/users/profile
 export const updateProfile = asyncHandler(async (req, res) => {
-    const { name, userName, email, mobile, address, dateOfBirth, profileImage } =
-        req.body;
+    const { name, userName, email, mobile, address, dateOfBirth, profileImage } = req.body;
 
     const updates = {};
 
