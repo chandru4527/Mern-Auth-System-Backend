@@ -3,6 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 
 import indexRoutes from "./routes/index.routes.js";
+
 import { errorHandler, notFound } from "./middleware/error.middleware.js";
 
 const app = express();
@@ -11,10 +12,10 @@ app.disable("x-powered-by");
 
 // CORS configuration
 app.use(
-  cors({
-    origin: process.env.CLIENT_URL,
-    credentials: true,
-  })
+    cors({
+        origin: process.env.CLIENT_URL,
+        credentials: true,
+    })
 );
 
 // Request parsers
