@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import User from "../models/users.model.js";
+import Users from "../models/users.model.js";
 import asyncHandler from "../utils/asyncHandler.js";
 
 export const protect = asyncHandler(async (req, res, next) => {
@@ -30,7 +30,7 @@ export const protect = asyncHandler(async (req, res, next) => {
         });
     }
 
-    const user = await User.findById(decoded.sub);
+    const user = await Users.findById(decoded.sub);
 
     if (!user || !user.isActive) {
         return res.status(401).json({
