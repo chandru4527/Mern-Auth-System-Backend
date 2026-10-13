@@ -24,7 +24,7 @@ app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 app.use(cookieParser());
 
 // API routes
-app.use("/api", indexRoutes);
+app.use("/ck1", indexRoutes);
 
 // Error handling (must be last)
 app.use(notFound);

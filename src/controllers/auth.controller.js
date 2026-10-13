@@ -13,7 +13,7 @@ const JWT_REFRESH_TOKEN_SECRET = process.env.JWT_REFRESH_TOKEN_SECRET;
 
 const isProduction = process.env.NODE_ENV === "production";
 
-const ACCESS_TOKEN_MAX_AGE = 2 * 60 * 1000;
+const ACCESS_TOKEN_MAX_AGE = 15 * 60 * 1000;
 const REFRESH_TOKEN_MAX_AGE = 7 * 24 * 60 * 60 * 1000;
 
 // Cookie options
@@ -29,7 +29,7 @@ const refreshCookieOptions = {
     httpOnly: true,
     secure: isProduction,
     sameSite: isProduction ? "none" : "lax",
-    path: "/api/auth",
+    path: "/ck1/auth",
     maxAge: REFRESH_TOKEN_MAX_AGE,
 };
 
@@ -289,14 +289,14 @@ export const logout = asyncHandler(async (req, res) => {
         httpOnly: true,
         secure: isProduction,
         sameSite: isProduction ? "none" : "lax",
-        path: "/",
+        path: "/ck1/auth",
     });
 
     res.clearCookie("refreshToken", {
         httpOnly: true,
         secure: isProduction,
         sameSite: isProduction ? "none" : "lax",
-        path: "/api/auth",
+        path: "/ck1/auth",
     });
 
     return res.status(200).json({
