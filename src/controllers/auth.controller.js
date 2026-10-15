@@ -42,6 +42,7 @@ const sendUserResponse = (user) => ({
     role: user.role,
     isActive: user.isActive,
     profileImage: user.profileImage,
+    coverImage: user.coverImage,
     mobile: user.mobile,
     address: user.address,
     dateOfBirth: user.dateOfBirth,

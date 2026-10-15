@@ -30,11 +30,7 @@ export const uploadMedia = asyncHandler(async (req, res) => {
         message: "Media uploaded successfully",
         result: {
             url: result.secure_url,
-            publicId: result.public_id,
-            format: result.format,
-            width: result.width,
-            height: result.height,
-            size: result.bytes,
-        },
+            publicId: result.public_id
+        }
     });
 });

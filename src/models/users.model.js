@@ -46,6 +46,12 @@ const userSchema = new mongoose.Schema(
                 "https://res.cloudinary.com/dyiuqcqg2/image/upload/v1784782307/default-avatar-profile-icon-social-media.jpg",
         },
 
+        coverImage:{
+            type: String,
+            default:
+                "https://png.pngtree.com/background/20250202/original/pngtree-green-leaves-reflecting-in-calm-water-nature-background-stock-photo-picture-image_15752907.jpg",
+        },
+
         mobile: {
             type: String,
             default: "",

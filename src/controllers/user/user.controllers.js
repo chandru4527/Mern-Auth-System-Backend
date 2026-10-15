@@ -1,7 +1,7 @@
 import User from "../models/user.model.js";
 import asyncHandler from "../../utils/asyncHandler.js";
 
-const getProfileData = (user) => ({
+const sendUserResponse = (user) => ({
     id: user._id,
     name: user.name,
     userName: user.userName,
@@ -9,21 +9,13 @@ const getProfileData = (user) => ({
     role: user.role,
     isActive: user.isActive,
     profileImage: user.profileImage,
+    coverImage: user.coverImage,
     mobile: user.mobile,
     address: user.address,
     dateOfBirth: user.dateOfBirth,
+    termsAccepted: user.termsAccepted,
+    termsAcceptedAt: user.termsAcceptedAt,
     createdAt: user.createdAt,
-    updatedAt: user.updatedAt,
-});
-
-// GET /api/users/profile
-export const getProfile = asyncHandler(async (req, res) => {
-    return res.status(200).json({
-        success: true,
-        data: {
-            user: getProfileData(req.user),
-        },
-    });
 });
 
 // PUT /api/users/profile
@@ -154,7 +146,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
         success: true,
         message: "Profile updated successfully",
         data: {
-            user: getProfileData(user),
+            user: sendUserResponse(user),
         },
     });
 });
