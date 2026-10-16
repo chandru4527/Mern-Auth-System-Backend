@@ -290,7 +290,7 @@ export const logout = asyncHandler(async (req, res) => {
         httpOnly: true,
         secure: isProduction,
         sameSite: isProduction ? "none" : "lax",
-        path: "/ck1/auth",
+        path: "/",
     });
 
     res.clearCookie("refreshToken", {
