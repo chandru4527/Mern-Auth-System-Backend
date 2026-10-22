@@ -3,7 +3,7 @@ import { protect } from "../../middleware/auth.middleware.js";
 import { adminOnly } from "../../middleware/admin.middleware.js";
 
 import { getDashboardStats } from "../../controllers/admin/dashboard/dashboard.controller.js";
-import { getAllUsers, getUserById, updateUser, deleteUser } from '../../controllers/admin/users/Users.controller.js';
+import { getAllUsers, getUserById, updateUser, deleteUser } from '../../controllers/admin/users/users.controller.js';
 
 const router = Router();
 

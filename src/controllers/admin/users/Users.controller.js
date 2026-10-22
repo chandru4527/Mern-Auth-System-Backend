@@ -4,26 +4,22 @@ import asyncHandler from "../../../utils/asyncHandler.js";
 
 // Get all users with search, status filter, and pagination
 export const getAllUsers = asyncHandler(async (req, res) => {
-    const { search = "", status = "", page = 1, limit = 10 } = req.query;
+    const { name = "", email = "", status = "", page = 1, limit = 10, } = req.query;
 
     const currentPage = Math.max(1, Number.parseInt(page, 10) || 1);
     const perPage = Math.min(100, Math.max(1, Number.parseInt(limit, 10) || 10));
     const skip = (currentPage - 1) * perPage;
 
-    const filter = {
-        role: "user",
-    };
+    const filter = { role: "user" };
 
-    if (search.trim()) {
-        const escapedSearch = search.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-        const searchRegex = new RegExp(escapedSearch, "i");
+    if (name.trim()) {
+        const escapedName = name.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        filter.name = new RegExp(escapedName, "i");
+    }
 
-        filter.$or = [
-            { name: searchRegex },
-            { userName: searchRegex },
-            { email: searchRegex },
-            { mobile: searchRegex },
-        ];
+    if (email.trim()) {
+        const escapedEmail = email.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        filter.email = new RegExp(escapedEmail, "i");
     }
 
     if (status === "active") {
@@ -39,7 +35,6 @@ export const getAllUsers = asyncHandler(async (req, res) => {
             .skip(skip)
             .limit(perPage)
             .lean(),
-
         Users.countDocuments(filter),
     ]);
 
@@ -52,8 +47,6 @@ export const getAllUsers = asyncHandler(async (req, res) => {
             limit: perPage,
             totalUsers,
             totalPages: Math.ceil(totalUsers / perPage),
-            hasNextPage: currentPage * perPage < totalUsers,
-            hasPrevPage: currentPage > 1,
         },
     });
 });
@@ -134,7 +127,7 @@ export const updateUser = asyncHandler(async (req, res) => {
         id,
         { $set: updates },
         {
-            new: true,
+            returnDocument: "after",
             runValidators: true,
         }
     ).select("name userName email role isActive profileImage mobile address dateOfBirth createdAt updatedAt");

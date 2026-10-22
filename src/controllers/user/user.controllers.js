@@ -208,7 +208,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
         req.user._id,
         { $set: updates },
         {
-            new: true,
+            returnDocument: "after",
             runValidators: true,
         }
     );

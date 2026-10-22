@@ -11,10 +11,23 @@ const app = express();
 app.disable("x-powered-by");
 
 // CORS configuration
+// app.use(
+//     cors({
+//         origin: process.env.CLIENT_URL,
+//         credentials: true,
+//     })
+// );
+
 app.use(
     cors({
-        origin: process.env.CLIENT_URL,
+        origin: [
+            "http://localhost:2705",
+            "http://127.0.0.1:2705",
+            "http://10.24.156.203:2705"
+        ],
         credentials: true,
+        methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+        allowedHeaders: ["Content-Type", "Authorization"]
     })
 );
 
