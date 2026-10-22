@@ -43,7 +43,7 @@ const userSchema = new mongoose.Schema(
         profileImage: {
             type: String,
             default:
-                "https://res.cloudinary.com/dyiuqcqg2/image/upload/v1784782307/default-avatar-profile-icon-social-media.jpg",
+                "https://res.cloudinary.com/dyiuqcqg2/image/upload/v1792665814/default_profile_img_ngp2t0.webp",
         },
 
         coverImage: {

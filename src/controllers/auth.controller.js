@@ -65,6 +65,8 @@ const sendUserResponse = (user) => ({
     termsAccepted: user.termsAccepted,
     termsAcceptedAt: user.termsAcceptedAt,
     createdAt: user.createdAt,
+    uid: user.googleId || null
+
 });
 
 // POST /api/auth/register
