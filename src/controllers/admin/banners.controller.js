@@ -70,10 +70,12 @@ export const getBannerById = asyncHandler(async (req, res) => {
 export const updateBanner = asyncHandler(async (req, res) => {
     const { id } = req.params;
 
-    const banner = await Banners.findByIdAndUpdate(id, req.body, {
-        new: true,
-        runValidators: true,
-    });
+    const updateData = { ...req.body };
+
+    const banner = await Banners.findOneAndUpdate(
+        { _id: id }, updateData,
+        { returnDocument: "after", runValidators: true }
+    );
 
     if (!banner) {
         return res.status(404).json({
@@ -109,7 +111,7 @@ export const deleteBanner = asyncHandler(async (req, res) => {
 });
 
 export const getActiveBanners = asyncHandler(async (req, res) => {
-    
+
     const banners = await Banners.find({ isActive: true })
         .sort({ order: 1, createdAt: -1 })
         .select("image badge title highlight description order");

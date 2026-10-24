@@ -16,38 +16,22 @@ const isProduction = process.env.NODE_ENV === "production";
 const ACCESS_TOKEN_MAX_AGE = 15 * 60 * 1000;
 const REFRESH_TOKEN_MAX_AGE = 7 * 24 * 60 * 60 * 1000;
 
+
 const accessCookieOptions = {
     httpOnly: true,
-    secure: false,
-    sameSite: "lax",
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
     path: "/",
     maxAge: ACCESS_TOKEN_MAX_AGE
 };
 
 const refreshCookieOptions = {
     httpOnly: true,
-    secure: false,
-    sameSite: "lax",
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
     path: "/ck1/auth",
     maxAge: REFRESH_TOKEN_MAX_AGE
 };
-
-
-// const accessCookieOptions = {
-//     httpOnly: true,
-//     secure: isProduction,
-//     sameSite: isProduction ? "none" : "lax",
-//     path: "/",
-//     maxAge: ACCESS_TOKEN_MAX_AGE
-// };
-
-// const refreshCookieOptions = {
-//     httpOnly: true,
-//     secure: isProduction,
-//     sameSite: isProduction ? "none" : "lax",
-//     path: "/ck1/auth",
-//     maxAge: REFRESH_TOKEN_MAX_AGE
-// };
 
 // Safe user response (never return the password)
 const sendUserResponse = (user) => ({
@@ -286,7 +270,6 @@ export const googleLogin = asyncHandler(async (req, res) => {
 });
 
 // GET /api/auth/me
-// Requires protect middleware
 export const getMe = asyncHandler(async (req, res) => {
     return res.status(200).json({
         success: true,
@@ -298,32 +281,17 @@ export const getMe = asyncHandler(async (req, res) => {
 
 // POST /api/auth/logout
 export const logout = asyncHandler(async (req, res) => {
-    // res.clearCookie("accessToken", {
-    //     httpOnly: true,
-    //     secure: isProduction,
-    //     sameSite: isProduction ? "none" : "lax",
-    //     path: "/",
-    // });
-
-    // res.clearCookie("refreshToken", {
-    //     httpOnly: true,
-    //     secure: isProduction,
-    //     sameSite: isProduction ? "none" : "lax",
-    //     path: "/ck1/auth",
-    // });
-
-
     res.clearCookie("accessToken", {
         httpOnly: true,
-        secure: false,
-        sameSite: "lax",
+        secure: isProduction,
+        sameSite: isProduction ? "none" : "lax",
         path: "/",
     });
 
     res.clearCookie("refreshToken", {
         httpOnly: true,
-        secure: false,
-        sameSite: "lax",
+        secure: isProduction,
+        sameSite: isProduction ? "none" : "lax",
         path: "/ck1/auth",
     });
 

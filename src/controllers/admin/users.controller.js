@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
-import Users from "../../../models/users.model.js";
-import asyncHandler from "../../../utils/asyncHandler.js";
+import Users from "../../models/users.model.js";
+import asyncHandler from "../../utils/asyncHandler.js";
 
 // Get all users with search, status filter, and pagination
 export const getAllUsers = asyncHandler(async (req, res) => {
